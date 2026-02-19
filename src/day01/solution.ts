@@ -34,10 +34,10 @@ const getNumberOfOccurrences = (list: number[], target: number): number => {
 const getSimilarityScore = (leftList: number[], rightList: number[]): number => {
     let similarityScore: number = 0;
 
-    for (let i = 0; i < leftList.length; i++) {
-        const rightListOccurrences = getNumberOfOccurrences(rightList, leftList[i]);
+    for (const listItem of leftList) {
+        const rightListOccurrences = getNumberOfOccurrences(rightList, listItem);
 
-        similarityScore += leftList[i] * rightListOccurrences;
+        similarityScore += listItem * rightListOccurrences;
     }
 
     return similarityScore;

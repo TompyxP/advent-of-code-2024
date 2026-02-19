@@ -3,7 +3,7 @@ import '../extensions';
 
 const SAFE_CHANGE_MAX: number = 3;
 
-const lineIncreasesSafety = (lineNumbers: number[], useProblemDampener: boolean = false): boolean => {
+const lineIncreasesSafely = (lineNumbers: number[], useProblemDampener: boolean = false): boolean => {
     for (let i = 1; i < lineNumbers.length; i++) {
         const change = lineNumbers[i] - lineNumbers[i - 1];
 
@@ -12,7 +12,7 @@ const lineIncreasesSafety = (lineNumbers: number[], useProblemDampener: boolean 
                 let withoutCurrentIndex = lineNumbers.removeAtIndex(i);
                 let withoutPreviousIndex = lineNumbers.removeAtIndex(i - 1);
 
-                return lineIncreasesSafety(withoutCurrentIndex) || lineIncreasesSafety(withoutPreviousIndex);
+                return lineIncreasesSafely(withoutCurrentIndex) || lineIncreasesSafely(withoutPreviousIndex);
             } else {    
                 return false;
             }
@@ -21,26 +21,8 @@ const lineIncreasesSafety = (lineNumbers: number[], useProblemDampener: boolean 
     return true;
 }
 
-const lineDecreasesSafety = (lineNumbers: number[], useProblemDampener: boolean = false): boolean => {
-    for (let i = lineNumbers.length - 1; i > 0; i--) {
-        const change = lineNumbers[i - 1] - lineNumbers[i];
-
-        if (change <= 0 || change > SAFE_CHANGE_MAX) {
-            if (useProblemDampener) {
-                let withoutCurrentIndex = lineNumbers.removeAtIndex(i);
-                let withoutPreviousIndex = lineNumbers.removeAtIndex(i - 1);
-
-                return lineDecreasesSafety(withoutCurrentIndex) || lineDecreasesSafety(withoutPreviousIndex);
-            } else {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 const isLineSafe = (lineNumbers: number[], useProblemDampener: boolean = false): boolean => {
-    return lineIncreasesSafety(lineNumbers, useProblemDampener) || lineDecreasesSafety(lineNumbers, useProblemDampener);
+    return lineIncreasesSafely(lineNumbers, useProblemDampener) || lineIncreasesSafely([...lineNumbers].reverse(), useProblemDampener);
 }
 
 const getSafeLineCount = (lines: string[], useProblemDampener: boolean = false): number => {

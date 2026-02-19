@@ -1,5 +1,4 @@
 import { readLines } from '../utils';
-import '../extensions';
 
 const getSortedLists = (lines: string[]): [number[], number[]] => {
     const leftList: number[] = [];

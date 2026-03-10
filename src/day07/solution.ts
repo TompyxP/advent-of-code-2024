@@ -17,7 +17,12 @@ const createEquationDataArray = (input: string[]): EquationData[] => {
     return equationDataArray;
 }
 
-const numbersCanProduceResult = (data: EquationData): boolean => {
+const concatenateNumbers = (a: number, b: number): number => {
+    const digits = b === 0 ? 1 : Math.floor(Math.log10(Math.abs(b))) + 1;
+    return a * Math.pow(10, digits) + b;
+}
+
+const numbersCanProduceResult = (data: EquationData, includeConcatenation: boolean = false): boolean => {
     const { numbers, outcome } = data;
 
     const intermediateResults: Map<number, number[]> = new Map();
@@ -27,21 +32,38 @@ const numbersCanProduceResult = (data: EquationData): boolean => {
 
             intermediateResults.set(i, [
                 numbers[i - 1] + numbers[i],
-                numbers[i - 1] * numbers[i]
+                numbers[i - 1] * numbers[i],
+                ...(includeConcatenation ? [concatenateNumbers(numbers[i - 1], numbers[i])] : [])
             ]);
         } else {
 
             for (const prevResult of intermediateResults.get(i - 1) ?? []) {
                 if (intermediateResults.has(i)) {
+                    const sum = prevResult + numbers[i];
+                    const product = prevResult * numbers[i];
+                    const concatenation = includeConcatenation ? concatenateNumbers(prevResult, numbers[i]) : null;
+                    const possibleResults = [
+                        sum <= outcome ? sum : null,
+                        product <= outcome ? product : null,
+                        concatenation && concatenation <= outcome ? concatenation : null
+                    ].filter(result => result !== null) as number[];
+
                     intermediateResults.set(i, [
                         ...(intermediateResults.get(i) ?? []),
-                        prevResult + numbers[i],
-                        prevResult * numbers[i]
+                        ...possibleResults
                     ]);
                 } else {
+                    const sum = prevResult + numbers[i];
+                    const product = prevResult * numbers[i];
+                    const concatenation = includeConcatenation ? concatenateNumbers(prevResult, numbers[i]) : null;
+                    const possibleResults = [
+                        sum <= outcome ? sum : null,
+                        product <= outcome ? product : null,
+                        concatenation && concatenation <= outcome ? concatenation : null
+                    ].filter(result => result !== null) as number[];
+
                     intermediateResults.set(i, [
-                        prevResult + numbers[i],
-                        prevResult * numbers[i]
+                        ...possibleResults
                     ]);
                 }
             }
@@ -51,11 +73,11 @@ const numbersCanProduceResult = (data: EquationData): boolean => {
     return intermediateResults.get(numbers.length - 1)?.includes(outcome) ?? false;
 }
 
-const getSumOfValidEquationResults = (equationDataArray: EquationData[]): number => {
+const getSumOfValidEquationResults = (equationDataArray: EquationData[], includeConcatenation: boolean = false): number => {
     let sum: number = 0;
 
     for (const data of equationDataArray) {
-        if (numbersCanProduceResult(data)) {
+        if (numbersCanProduceResult(data, includeConcatenation)) {
             sum += data.outcome;
         }
     }
@@ -68,7 +90,8 @@ const main = () => {
         const input: string[] = readLines(__dirname);
         const equationDataArray: EquationData[] = createEquationDataArray(input);
 
-        console.log('Sum of Valid Equation Results:', getSumOfValidEquationResults(equationDataArray));
+        console.log('Sum of Valid Equation Results (without concatenation):', getSumOfValidEquationResults(equationDataArray, false));
+        console.log('Sum of Valid Equation Results (with concatenation):', getSumOfValidEquationResults(equationDataArray, true));
 
     } catch (error) {
         console.error('Error:', error);
